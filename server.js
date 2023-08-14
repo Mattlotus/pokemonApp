@@ -21,8 +21,14 @@ app.get ("/pokemon", (req,res)=>{
     res.render("Index")
 
 })
-app.get("/pokemon/:id", (req,res)=>{
-    res.send(req.params.id)
+
+app.get('/pokemon/Show',(req,res)=>{
+    res.render('Show')
+})
+
+app.get('/pokemon/New', (req,res)=>{
+    res.render('New')
+    
 })
 
 
@@ -38,6 +44,9 @@ app.get("/pokemon/:id", (req,res)=>{
 
 
 
+app.get("/pokemon/:id", (req,res)=>{
+    res.render('Show', {pokemon: Pokemon[req.params.id]})
+})
 
 
 app.listen(PORT, (req,res)=>{
