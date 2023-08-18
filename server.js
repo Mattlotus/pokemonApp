@@ -31,6 +31,23 @@ app.get('/pokemon/New', (req,res)=>{
     
 })
 
+// C -> create. need to first make a model schema
+    //  every route that deals with database should have trycatch and sync/await. ( dont always need but good to have )
+    app.post( '/', async ( req, res ) => {
+
+        try {
+           const post = await Post.create( req.body )
+           res.send( post ) // this will have _id from database
+        } catch (error) {
+            console.error( error )
+            // res.status(500).json( { error: error.message } )
+        }
+    
+        // TESTING
+        // - headers content-type application/json
+        // - body json { }
+    })
+
 //  delete route must be above update route...idk y yet.
 
 app.delete( '/:id', async ( req, res ) => {
@@ -66,7 +83,12 @@ app.put( '/:id', async ( req, res ) => {
     }
 })
 
-
+app.get('/',(req,res)=>{
+    let id = req.params
+    try{
+        const post = await Post.findByIdUpdate(id,req.body)
+    }
+})
 
 
 
