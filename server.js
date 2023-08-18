@@ -32,7 +32,7 @@ app.get('/pokemon/New', (req,res)=>{
 })
 
 // C -> create. need to first make a model schema
-    //  every route that deals with database should have trycatch and sync/await. ( dont always need but good to have )
+    //  every route that deals with database should have trycatch and sync/await.
     app.post( '/', async ( req, res ) => {
 
         try {
@@ -83,12 +83,7 @@ app.put( '/:id', async ( req, res ) => {
     }
 })
 
-app.get('/',(req,res)=>{
-    let id = req.params
-    try{
-        const post = await Post.findByIdUpdate(id,req.body)
-    }
-})
+
 
 
 
