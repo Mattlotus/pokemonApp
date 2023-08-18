@@ -31,6 +31,42 @@ app.get('/pokemon/New', (req,res)=>{
     
 })
 
+//  delete route must be above update route...idk y yet.
+
+app.delete( '/:id', async ( req, res ) => {
+
+    let  id  = req.params
+
+    try {
+        await Post.findByIdAndDelete( id )
+        res.send( 'Post has been deleted' ) // just so we know it ran
+    } catch (error) {
+        res.status(500).send( "Server error" )
+    }
+
+
+
+})
+
+// update routes......................
+
+app.put( '/:id', async ( req, res ) => {
+
+    let { id } = req.params
+
+    try {
+        // ( what's being updated, what it's being updated to, { rules to follow on return }  )
+        const post = await Post.findByIdAndUpdate( id, req.body, {
+            new: true // this returns updated post and not pre-updated
+        } ) // id will come from req
+        res.send( post )
+    } catch (error) {
+        console.error(error)
+        res.status(500).send( "Server error" )
+    }
+})
+
+
 
 
 
