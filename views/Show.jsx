@@ -1,5 +1,5 @@
 import React from 'react'
-import pokemon from '../models/pokemon';
+import pokemon from '../utilities/pokemon';
 
 function Show(props) {
     const myStyle = {

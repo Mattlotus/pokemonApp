@@ -1,44 +1,66 @@
 
 import React from 'react'
-import pokemon from '../models/pokemon';
 
-function Index() {
+const Index = ( { pokemons } ) => {
+
     const myStyle = {
         color: '#ffffff',
         backgroundColor: 'peru',
-        };
+        fontSize: "2em",
+    };
 
-        // let firstLetter = Pokemon.name[0].toUpperCase()
-        // let rest = Pokemon.name.substring(1)
-        
+    const linkStyle = {
+        textDecoration: "none",
+        color: 'slategrey',
+        fontWeight: "bold",
+        listStyle: "none",
+        margin: '10px',
+        display: 'flex',
+        alignItems: "center",
+        justifyContent: "left"
+    }
+
   return (
-    
-         <div style={myStyle}>
-          <div>
-    <nav>
-        <a href="/pokemon/Show">Create a New Pokemon</a>
-    </nav>
-    {pokemon.map((Pokemon, i) => {
-         let firstLetter = Pokemon.name[0].toUpperCase()
-         let rest = Pokemon.name.substring(1)
-        return (
-        <div key={i}>
-            <a href={`/pokemon/${i}`}>
-            <h2>{firstLetter + rest}</h2>
-            </a>
-        </div>
-        );
-    })}
+    <div style={myStyle}>
+      <h1>See All The Pokemon!'</h1>
+      <a href="/pokemon/new">Create a New Pokemon</a>
+
+
+      <ul>
+        { pokemons.length === 0 ? <h2>Sorry no Pokemon to show</h2> : 
+            pokemons?.map((pokemon, index) => {
+            // pokemon.name.split('').forEach(( letter, index ) => {
+            //     index === 0 && letter.toUpperCase
+            // })
+            let firstLetter = pokemon?.name[0].toUpperCase()
+            let rest = pokemon?.name.substring(1)
+
+
+            return (
+                <>
+                    <li style={{ display: "flex", }}>
+                            <img src="https://www.freeiconspng.com/thumbs/pokeball-png/pokeball-transparent-png-2.png" alt="pokeball" style={{ height: '30px', }} />
+                        <a href={`/pokemon/${pokemon._id}`} key={index} style={ linkStyle }>
+                            <span style={{ margin: "10px" }}>{ pokemon?.name.charAt(0).toUpperCase() + rest }</span>
+                        </a>
+                    </li>
+                    <br />
+                    <span>{String(pokemon._id)}</span>
+                    <a href={`/pokemon/edit/${pokemon._id}`}>
+                        <button>Edit</button>
+                    </a>
+                    <form action={`/pokemon/${pokemon._id}?_method=DELETE`} method="POST">
+                        {/*  */}
+                        {/* shoutout Q */}
+                        <button style={{ backgroundColor: "crimson" }}>DELETE</button>
+                    </form>
+                    <hr />
+                </>
+            )
+        }) }
+      </ul>
     </div>
-
-        
-
-         </div>
-    
-         
   )
-  
 }
 
 export default Index
-

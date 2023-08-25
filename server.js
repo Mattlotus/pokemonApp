@@ -1,90 +1,153 @@
-const express = require('express')
+const express = require("express")
 const app = express()
-PORT= 3000
+const PORT = 3000
 
-    
+require("dotenv").config() 
+const mongoose = require("mongoose")
+const MONGO_URI = process.env.MONGO_URI
 
-const Pokemon = require('./models/pokemon.js');
+const Pokemon = require('./models/pokemon') // schema
+const pokemons = require('./utilities/pokemon') // for seed
 
-app.set('view engine', 'jsx')
-app.engine('jsx', require("express-react-views").createEngine())
+const methodOveride = require("method-override") // override for delete and update reqs
 
-app.get("/" , (req,res)=>{
-    res.send('<h1>Welcome to the Pokemon App</h1>')
-    
+// MIDDLEWARE
+// view engine
+app.set("view engine", "jsx")
+app.engine("jsx", require("express-react-views").createEngine())
+
+// runs between all routes
+app.use((req, res, next) => {
+    console.log('I run for all routes');
+    next(); // calls next step
+});
+
+// tell express to use the middleware.. view body of a post request
+app.use(express.urlencoded({extended:false}));
+
+// connect to DB
+mongoose.connect( MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 })
-// app.get ('/pokemon' , (req,res)=>{
-//     res.send(Pokemon)
-// })
 
-app.get ("/pokemon", (req,res)=>{
-    res.render("Index")
+app.use(methodOveride("_method"))
 
+
+// ROUTES
+app.get('/', ( req, res ) => {
+    res.send(`
+        <h1>Welcome to the Pokemon App!</h1>
+        <a href="/pokemon"> View All Pokemon </a>
+    `)
 })
 
-app.get('/pokemon/Show',(req,res)=>{
-    res.render('Show')
+// SEED
+app.get('/pokemon/seed', async(req,res)=>{
+    //Deleting All Current Data(optional)
+    await Pokemon.deleteMany({}) //PokemonSchema
+    //create a list of pokemon
+    await Pokemon.create( pokemons ) //imported pokemon data array
+    res.redirect('/pokemon')
 })
 
-app.get('/pokemon/New', (req,res)=>{
-    res.render('New')
-    
+app.get('/pokemon', async ( req, res ) => {
+    // res.send(pokemons)
+    try {
+        const allPokemon = await Pokemon.find({})
+        res.render("Index", { pokemons : allPokemon }) // dont like the plural but...
+    } catch (error) {
+        res.status(500).send( "Server Error" )
+    }
 })
 
-// C -> create. need to first make a model schema
-    //  every route that deals with database should have trycatch and sync/await.
-    app.post( '/', async ( req, res ) => {
+app.get('/pokemon/new', ( req, res ) => {
+    res.render("New")
+})
 
-        try {
-           const post = await Post.create( req.body )
-           res.send( post ) // this will have _id from database
-        } catch (error) {
-            console.error( error )
-            // res.status(500).json( { error: error.message } )
-        }
-    
-        // TESTING
-        // - headers content-type application/json
-        // - body json { }
-    })
-
-//  delete route must be above update route...idk y yet.
-
-app.delete( '/:id', async ( req, res ) => {
-
-    let  id  = req.params
+app.get( '/pokemon/edit/:id', async ( req, res ) => {
+    let { id } = req.params
 
     try {
-        await Post.findByIdAndDelete( id )
-        res.send( 'Post has been deleted' ) // just so we know it ran
+        let pokemon = await Pokemon.findById( id )
+        res.render( "Edit", { pokemon: pokemon } )
+        
     } catch (error) {
-        res.status(500).send( "Server error" )
+        res.status(500).send( error )
     }
-
-
-
 })
 
-// update routes......................
-
-app.put( '/:id', async ( req, res ) => {
+app.put( '/pokemon/edit/:id', async ( req, res ) => {
 
     let { id } = req.params
 
     try {
-        // ( what's being updated, what it's being updated to, { rules to follow on return }  )
-        const post = await Post.findByIdAndUpdate( id, req.body, {
-            new: true // this returns updated post and not pre-updated
-        } ) // id will come from req
-        res.send( post )
+        await Pokemon.findByIdAndUpdate( id, req.body )
+
+        res.redirect( '/pokemon' )
+        
     } catch (error) {
-        console.error(error)
+        res.status(500).send( error )
+    }
+
+} )
+
+app.delete( '/pokemon/:id', async ( req, res ) => {
+    let { id } = req.params
+    try {
+        // await Pokemon.findOneAndDelete( { _id: id } )
+        await Pokemon.findByIdAndDelete( id )
+        // await Pokemon.findByIdAndRemove( id )
+        res.redirect( '/pokemon' )
+        // res.send( 'pokemon deleted' )
+    } catch (error) {
         res.status(500).send( "Server error" )
     }
 })
 
+// route matches path from FORM ACTION ATTRIBUTE
+app.post('/pokemon', async ( req, res ) => {
+    // const newPokemon = await req.body
+    
+    // res.send(newPokemon)
+    // console.log( req.body )
+    // pokemons.push( req.body )
+    // res.send('data received')
+    
+    await Pokemon.create( req.body )
+    res.redirect('/pokemon')
+
+})
 
 
+app.get( 'pokemon/:id/update', ( req, res ) => {
+
+})
+
+app.get('/pokemon/:id', async ( req, res ) => {
+    // res.send( req.params.id )
+    
+    let { id } = req.params
+
+    const pokemon = await Pokemon.findById( id )
+    res.render("Show", { pokemon : pokemon })
+})
+
+
+
+// API
+const fetchPokemon = async (name) => {
+    const response = await fetch(`https://pokeapi.co/api/v2/${name}`)
+    console.log(response)
+}
+
+
+mongoose.connection.once( 'open', () => {
+    console.log('Connected to database')
+    app.listen(PORT, ( req, res ) => {
+        console.log(`Server is running on port ${PORT}`)
+    })
+})
 
 
 

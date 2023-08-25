@@ -12,8 +12,10 @@ const PostSchema = new mongoose.Schema({
     },
 })
 
+const Pokemon = mongoose.model('Pokemon',PostSchema)
+
 // this schema is a model for this data type
 
-const Post = mongoose.model( 'Post' /* collection name in DB */ , PostSchema )
+const Post = mongoose.model( 'Post' , PostSchema )
 
 module.exports = Post
